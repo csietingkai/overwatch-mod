@@ -1,0 +1,8 @@
+package com.tingkai.overwatch.messages;
+
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+
+public class SPacketSpawnParticle implements IMessage
+{
+
+}

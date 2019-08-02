@@ -1,0 +1,44 @@
+package com.tingkai.overwatch;
+
+import net.minecraftforge.fml.common.Mod;
+
+@Mod(modid = Overwatch.MODID, version = Overwatch.VERSION, name = Overwatch.MODNAME, guiFactory = "twopiradians.minewatch.client.gui.config.GuiFactory", updateJSON = "https://raw.githubusercontent.com/2piradians/Overwatch/1.12.2/update.json")
+public class Overwatch
+{
+	public static final String MODNAME = "Overwatch";
+	public static final String MODID = "minewatch";
+	public static final String VERSION = "3.2";
+	@Mod.Instance(MODID)
+	public static Overwatch instance;
+	public static OverwatchTab tab = new OverwatchTab("tabOverwatch");
+	@SidedProxy(clientSide = "twopiradians.minewatch.client.ClientProxy", serverSide = "twopiradians.minewatch.common.CommonProxy")
+	public static CommonProxy proxy;
+	public static SimpleNetworkWrapper network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+	public static final Keys keys = new Keys();
+	public static File configFile;
+
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event)
+	{
+		proxy.preInit(event);
+	}
+
+	@EventHandler
+	public void init(FMLInitializationEvent event)
+	{
+		proxy.init(event);
+	}
+
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		proxy.postInit(event);
+	}
+
+	@EventHandler
+	public void serverLoad(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new CommandOverwatch());
+		event.registerServerCommand(new CommandDev());
+	}
+}

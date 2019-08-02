@@ -1,0 +1,9 @@
+package com.tingkai.overwatch.items.weapons;
+
+public class ItemWidowmakerRifle extends ItemModWeapon
+{
+	public ItemWidowmakerRifle()
+	{
+		super(10);
+	}
+}

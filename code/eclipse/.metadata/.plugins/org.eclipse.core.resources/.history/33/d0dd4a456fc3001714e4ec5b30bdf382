@@ -1,0 +1,8 @@
+package com.tingkai.overwatch.render;
+
+import net.minecraft.client.renderer.entity.Render;
+
+public class RenderGenjiShuriken //extends Render<EntityGenjiShuriken>
+{
+	
+}

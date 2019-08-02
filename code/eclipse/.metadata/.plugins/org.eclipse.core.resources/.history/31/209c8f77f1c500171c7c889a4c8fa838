@@ -1,0 +1,9 @@
+package com.tingkai.overwatch.items.weapons;
+
+public class ItemReinhardtHammer extends ItemOWWeapon
+{
+	public ItemReinhardtHammer()
+	{
+		super(10);
+	}
+}

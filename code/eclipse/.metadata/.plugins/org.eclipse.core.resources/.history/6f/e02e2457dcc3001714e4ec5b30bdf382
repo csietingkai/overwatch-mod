@@ -1,0 +1,10 @@
+package com.tingkai.overwatch.render;
+
+import com.tingkai.overwatch.entities.EntitySoldier76HelixRocket;
+
+import net.minecraft.client.renderer.entity.Render;
+
+public class RenderSoldier76HelixRocket extends Render<EntitySoldier76HelixRocket>
+{
+
+}

@@ -1,0 +1,8 @@
+package com.tingkai.overwatch.render;
+
+import net.minecraftforge.fml.client.registry.IRenderFactory;
+
+public class RenderFactory implements IRenderFactory<T extends>
+{
+
+}

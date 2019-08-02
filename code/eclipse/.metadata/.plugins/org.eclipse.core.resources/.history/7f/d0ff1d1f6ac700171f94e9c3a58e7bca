@@ -1,0 +1,8 @@
+package com.tingkai.overwatch.entities;
+
+import net.minecraft.entity.projectile.EntityThrowable;
+
+public class EntityModThrowable extends EntityThrowable
+{
+
+}

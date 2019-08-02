@@ -1,0 +1,22 @@
+package com.tingkai.overwatch.render;
+
+import com.tingkai.overwatch.Overwatch;
+import com.tingkai.overwatch.entities.EntityWidowmakerBullet;
+
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.util.ResourceLocation;
+
+public class RenderWidowmakerBullet extends Render<EntityWidowmakerBullet>
+{
+	protected RenderWidowmakerBullet(RenderManager renderManager)
+	{
+		super(renderManager);
+	}
+
+	@Override
+	protected ResourceLocation getEntityTexture(EntityWidowmakerBullet entity)
+	{
+		return new ResourceLocation(Overwatch.MODID, "textures/entity/widowmaker_bullet.png");
+	}
+}

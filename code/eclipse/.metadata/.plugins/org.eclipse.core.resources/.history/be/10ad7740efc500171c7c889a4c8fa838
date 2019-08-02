@@ -1,0 +1,24 @@
+package com.tingkai.overwatch.items.weapons;
+
+import java.util.HashMap;
+
+import com.google.common.collect.Maps;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.MinecraftForge;
+
+public class ItemReaperShotgun extends ItemOWWeapon
+{
+	public static HashMap<EntityPlayer, Tuple<Integer, Vec3d>> clientTps = Maps.newHashMap();
+	public static HashMap<EntityPlayer, Tuple<Integer, Vec3d>> serverTps = Maps.newHashMap();
+
+	public ItemReaperShotgun() {
+		super(30);
+		this.hasOffHand = true;
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+	
+	
+}

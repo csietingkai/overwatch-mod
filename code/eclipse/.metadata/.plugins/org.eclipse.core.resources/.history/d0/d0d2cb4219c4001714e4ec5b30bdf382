@@ -1,0 +1,11 @@
+package com.tingkai.overwatch.particles;
+
+import net.minecraft.client.particle.ParticleSimpleAnimated;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class ParticleAnaHealth extends ParticleSimpleAnimated
+{
+
+}

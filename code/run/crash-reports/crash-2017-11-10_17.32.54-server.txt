@@ -1,0 +1,91 @@
+---- Minecraft Crash Report ----
+// Oh - I know what I did wrong!
+
+Time: 11/10/17 5:32 PM
+Description: Ticking player
+
+java.lang.NullPointerException: Ticking player
+	at com.tingkai.overwatch.hero.Ability.getUses(Ability.java:99)
+	at com.tingkai.overwatch.hero.Ability.isSelected(Ability.java:81)
+	at com.tingkai.overwatch.items.weapons.ItemTracerPistol.onUpdate(ItemTracerPistol.java:54)
+	at net.minecraft.item.ItemStack.updateAnimation(ItemStack.java:500)
+	at net.minecraft.entity.player.InventoryPlayer.decrementAnimations(InventoryPlayer.java:392)
+	at net.minecraft.entity.player.EntityPlayer.onLivingUpdate(EntityPlayer.java:564)
+	at net.minecraft.entity.EntityLivingBase.onUpdate(EntityLivingBase.java:2296)
+	at net.minecraft.entity.player.EntityPlayer.onUpdate(EntityPlayer.java:259)
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdateEntity(EntityPlayerMP.java:371)
+	at net.minecraft.network.NetHandlerPlayServer.update(NetHandlerPlayServer.java:176)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher$1.update(NetworkDispatcher.java:218)
+	at net.minecraft.network.NetworkManager.processReceivedPackets(NetworkManager.java:309)
+	at net.minecraft.network.NetworkSystem.networkTick(NetworkSystem.java:197)
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:818)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:699)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:156)
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:548)
+	at java.lang.Thread.run(Unknown Source)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Server thread
+Stacktrace:
+	at com.tingkai.overwatch.hero.Ability.getUses(Ability.java:99)
+	at com.tingkai.overwatch.hero.Ability.isSelected(Ability.java:81)
+	at com.tingkai.overwatch.items.weapons.ItemTracerPistol.onUpdate(ItemTracerPistol.java:54)
+	at net.minecraft.item.ItemStack.updateAnimation(ItemStack.java:500)
+	at net.minecraft.entity.player.InventoryPlayer.decrementAnimations(InventoryPlayer.java:392)
+	at net.minecraft.entity.player.EntityPlayer.onLivingUpdate(EntityPlayer.java:564)
+	at net.minecraft.entity.EntityLivingBase.onUpdate(EntityLivingBase.java:2296)
+	at net.minecraft.entity.player.EntityPlayer.onUpdate(EntityPlayer.java:259)
+
+-- Player being ticked --
+Details:
+	Entity Type: null (net.minecraft.entity.player.EntityPlayerMP)
+	Entity ID: 151
+	Entity Name: Player461
+	Entity's Exact location: 219.50, 78.00, 336.50
+	Entity's Block location: World: (219,78,336), Chunk: (at 11,4,0 in 13,21; contains blocks 208,0,336 to 223,255,351), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Entity's Momentum: 0.00, -0.08, 0.00
+	Entity's Passengers: []
+	Entity's Vehicle: ~~ERROR~~ NullPointerException: null
+Stacktrace:
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdateEntity(EntityPlayerMP.java:371)
+	at net.minecraft.network.NetHandlerPlayServer.update(NetHandlerPlayServer.java:176)
+	at net.minecraftforge.fml.common.network.handshake.NetworkDispatcher$1.update(NetworkDispatcher.java:218)
+	at net.minecraft.network.NetworkManager.processReceivedPackets(NetworkManager.java:309)
+
+-- Ticking connection --
+Details:
+	Connection: net.minecraft.network.NetworkManager@3c39a740
+Stacktrace:
+	at net.minecraft.network.NetworkSystem.networkTick(NetworkSystem.java:197)
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:818)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:699)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:156)
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:548)
+	at java.lang.Thread.run(Unknown Source)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.11.2
+	Operating System: Windows 7 (amd64) version 6.1
+	Java Version: 1.8.0_141, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Oracle Corporation
+	Memory: 737064512 bytes (702 MB) / 1038876672 bytes (990 MB) up to 1038876672 bytes (990 MB)
+	JVM Flags: 3 total; -Xincgc -Xmx1024M -Xms1024M
+	IntCache: cache: 0, tcache: 0, allocated: 13, tallocated: 95
+	FML: MCP 9.38 Powered by Forge 13.20.0.2282 5 mods loaded, 5 mods active
+	States: 'U' = Unloaded 'L' = Loaded 'C' = Constructed 'H' = Pre-initialized 'I' = Initialized 'J' = Post-initialized 'A' = Available 'D' = Disabled 'E' = Errored
+	UCHIJAAAA	minecraft{1.11.2} [Minecraft] (minecraft.jar) 
+	UCHIJAAAA	mcp{9.19} [Minecraft Coder Pack] (minecraft.jar) 
+	UCHIJAAAA	FML{8.0.99.99} [Forge Mod Loader] (forgeSrc-1.11.2-13.20.0.2282.jar) 
+	UCHIJAAAA	forge{13.20.0.2282} [Minecraft Forge] (forgeSrc-1.11.2-13.20.0.2282.jar) 
+	UCHIJAAAA	overwatch{0.1} [Overwatch Mod] (bin) 
+	Loaded coremods (and transformers): 
+	GL info: ~~ERROR~~ RuntimeException: No OpenGL context found in the current thread.
+	Profiler Position: N/A (disabled)
+	Player Count: 1 / 8; [EntityPlayerMP['Player461'/151, l='New World', x=219.50, y=78.00, z=336.50]]
+	Type: Integrated Server (map_client.txt)
+	Is Modded: Definitely; Client brand changed to 'fml,forge'

@@ -1,0 +1,62 @@
+package com.tingkai.overwatch.items;
+
+import java.util.ArrayList;
+
+import com.tingkai.overwatch.Config;
+import com.tingkai.overwatch.Overwatch;
+import com.tingkai.overwatch.hero.EnumHeros;
+import com.tingkai.overwatch.items.armors.ItemOWArmor;
+import com.tingkai.overwatch.items.weapons.ItemGenjiShuriken;
+import com.tingkai.overwatch.items.weapons.ItemOWWeapon;
+
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+
+public class ModItems
+{
+	public static ArrayList<Item> jsonModelItems  = new ArrayList<Item>();
+	public static ArrayList<Item> objModelItems  = new ArrayList<Item>();
+	public static Item genji_shuriken_single; // used for projectile
+	
+	public static void preInit()
+	{
+		for (EnumHeros hero : EnumHeros.values())
+		{
+			hero.material = EnumHelper.addArmorMaterial(hero.name.toLowerCase(), Overwatch.MODNAME+":"+hero.name.toLowerCase(), 20, hero.armorReductionAmounts, 0, null, 0);
+			hero.helmet = (ItemOWArmor) registerItem(new ItemOWArmor(hero.material, 0, EntityEquipmentSlot.HEAD, hero),	hero.name.toLowerCase()+"_helmet", true, false);
+			hero.chestplate = (ItemOWArmor) registerItem(new ItemOWArmor(hero.material, 0, EntityEquipmentSlot.CHEST, hero), hero.name.toLowerCase()+"_chestplate", true, false);
+			hero.leggings = (ItemOWArmor) registerItem(new ItemOWArmor(hero.material, 0, EntityEquipmentSlot.LEGS, hero), hero.name.toLowerCase()+"_leggings", true, false);
+			hero.boots = (ItemOWArmor) registerItem(new ItemOWArmor(hero.material, 0, EntityEquipmentSlot.FEET, hero), hero.name.toLowerCase()+"_boots", true, false);
+			hero.weapon = (ItemOWWeapon) registerItem(hero.weapon, hero.name.toLowerCase()+"_weapon", true, true);
+			hero.token = (ItemOWToken) registerItem(new ItemOWToken(), hero.name.toLowerCase()+"_token", true, false);
+		}
+		
+		genji_shuriken_single = registerItem(new ItemGenjiShuriken(), "genji_shuriken_single", false, true);
+		//((ItemGenjiShuriken)genji_shuriken_single).hero = EnumHeros.GENJI;
+	}
+	
+	private static Item registerItem(Item item, String name, boolean addToTab, boolean usesObjModel)
+	{
+		if (usesObjModel && Config.useObjModels)
+		{
+			objModelItems.add(item);
+		}
+		else
+		{
+			jsonModelItems.add(item);
+		}
+		item.setUnlocalizedName(name);
+		item.setRegistryName(Overwatch.MODID, name);
+		if (addToTab)
+		{
+			item.setCreativeTab(Overwatch.tab);
+			Overwatch.tab.stacks.add(new ItemStack(item));
+		}
+		GameRegistry.register(item);
+		
+		return item;
+	}
+}

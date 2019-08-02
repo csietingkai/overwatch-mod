@@ -1,0 +1,12 @@
+package com.tingkai.overwatch.items.weapons;
+
+public class ItemMcCreeGun extends ItemOWWeapon
+{
+
+	public ItemMcCreeGun(int reloadTime)
+	{
+		super(reloadTime);
+		// TODO Auto-generated constructor stub
+	}
+
+}

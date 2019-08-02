@@ -1,0 +1,15 @@
+package com.tingkai.overwatch.particles;
+
+import net.minecraft.client.particle.ParticleSimpleAnimated;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class ParticleAnaHealth extends ParticleSimpleAnimated
+{
+	public ParticleAnaHealth(World worldIn, double x, double y, double z, int textureIdxIn, int numFrames, float yAccelIn)
+	{
+		super(worldIn, x, y, z, textureIdxIn, numFrames, yAccelIn);
+	}
+}

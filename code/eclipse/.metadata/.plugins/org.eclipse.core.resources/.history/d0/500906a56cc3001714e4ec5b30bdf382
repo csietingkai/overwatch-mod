@@ -1,0 +1,11 @@
+package com.tingkai.overwatch.model;
+
+import net.minecraft.client.model.ModelBase;
+
+public class ModelAnaBullet extends ModelBase
+{
+	public public ModelAnaBullet()
+	{
+		
+	}
+}

@@ -1,0 +1,10 @@
+package com.tingkai.overwatch.render;
+
+import com.tingkai.overwatch.entities.EntitySoldier76Bullet;
+
+import net.minecraft.client.renderer.entity.Render;
+
+public class RenderSoldier76Bullet extends Render<EntitySoldier76Bullet>
+{
+
+}

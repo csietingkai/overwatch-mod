@@ -1,0 +1,69 @@
+package com.tingkai.overwatch.messages;
+
+import java.util.UUID;
+
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.IThreadListener;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+public class CPacketSyncKeys implements IMessage
+{
+	private boolean isKeyPressed;
+	private UUID uuid;
+	private String keyName;
+	
+	public CPacketSyncKeys()
+	{
+		
+	}
+	
+	public CPacketSyncKeys(String keyName, boolean isKeyPressed, UUID uuid)
+	{
+		this.keyName = keyName;
+		this.isKeyPressed = isKeyPressed;
+		this.uuid = uuid;
+	}
+	
+	@Override
+	public void fromBytes(ByteBuf buf)
+	{
+		this.keyName = ByteBufUtils.readUTF8String(buf);
+		this.isKeyPressed = buf.readBoolean();
+		this.uuid = UUID.fromString(ByteBufUtils.readUTF8String(buf));
+	}
+
+	@Override
+	public void toBytes(ByteBuf buf)
+	{
+		ByteBufUtils.writeUTF8String(buf, keyName);
+		buf.writeBoolean(isKeyPressed);
+		ByteBufUtils.writeUTF8String(buf, uuid.toString());
+	}
+	
+	public static class Handler implements IMessageHandler<CPacketSyncKeys, IMessage>
+	{
+		@Override
+		public IMessage onMessage(final CPacketSyncKeys message, final MessageContext ctx)
+		{
+			IThreadListener mainThread = (WorldServer)ctx.getServerHandler().playerEntity.world;
+			mainThread.addScheduledTask(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					EntityPlayer player = ctx.getServerHandler().playerEntity;
+					if (message.keyName.equals("Hero Information"))
+					{
+						//Overwatch.keys.HERO_INFORMATION.
+					}
+				}
+			});
+			return null;
+		}
+	}
+}

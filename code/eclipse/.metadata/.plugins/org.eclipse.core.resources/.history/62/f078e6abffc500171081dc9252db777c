@@ -1,0 +1,10 @@
+package com.tingkai.overwatch.render;
+
+import com.tingkai.overwatch.entities.EntityWidowmakerBullet;
+
+import net.minecraft.client.renderer.entity.Render;
+
+public class RenderWidowmakerBullet extends Render<EntityWidowmakerBullet>
+{
+
+}

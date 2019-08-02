@@ -1,0 +1,42 @@
+package com.tingkai.overwatch.particles;
+
+import com.tingkai.overwatch.Overwatch;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleSimpleAnimated;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class ParticleAnaHealth extends ParticleSimpleAnimated
+{
+	public static final ResourceLocation TEXTURE = new ResourceLocation(Overwatch.MODID, "entity/particle/ana_health");
+	private EntityLivingBase base;
+
+	public ParticleAnaHealth(EntityLivingBase base)
+	{
+		super(base.world, base.posX, base.posY + base.height + 0.8d, base.posZ, 0, 0, 0);
+		this.base = base;
+		this.particleGravity = 0.0f;
+		this.particleMaxAge = Integer.MAX_VALUE;
+		this.particleScale = 3;
+		this.particleAlpha = 0.7f;
+		TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(TEXTURE.toString());
+		this.setParticleTexture(sprite);
+	}
+
+	@Override
+	public int getFXLayer()
+	{
+		return 1;
+	}
+
+	@Override
+	public void onUpdate()
+	{
+		super.onUpdate();
+	}
+}

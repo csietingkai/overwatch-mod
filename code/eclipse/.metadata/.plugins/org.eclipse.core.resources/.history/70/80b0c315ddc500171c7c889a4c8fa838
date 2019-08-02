@@ -1,0 +1,12 @@
+package com.tingkai.overwatch.items.weapons;
+
+public class ItemAnaRifle extends ItemOWWeapon
+{
+
+	public ItemAnaRifle()
+	{
+		super(10);
+		// TODO Auto-generated constructor stub
+	}
+
+}

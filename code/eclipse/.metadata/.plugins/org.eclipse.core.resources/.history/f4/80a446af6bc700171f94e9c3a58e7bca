@@ -1,0 +1,221 @@
+package com.tingkai.overwatch.items.armors;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import com.google.common.collect.Maps;
+import com.tingkai.overwatch.Overwatch;
+import com.tingkai.overwatch.hero.Ability;
+import com.tingkai.overwatch.hero.EnumHero;
+import com.tingkai.overwatch.key.Keys;
+import com.tingkai.overwatch.key.Keys.KeyBind;
+import com.tingkai.overwatch.messages.SPacketSyncAbilityUses;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemArmor.ArmorMaterial;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+public class ItemModArmor extends ItemArmor
+{
+	public EnumHero hero;
+
+	public static final EntityEquipmentSlot[] SLOTS = new EntityEquipmentSlot[] { EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET };
+
+	public ItemModArmor(EnumHero hero, ArmorMaterial materialIn, int renderIndexIn, EntityEquipmentSlot equipmentSlotIn)
+	{
+		super(materialIn, renderIndexIn, equipmentSlotIn);
+		this.hero = hero;
+	}
+
+	@Override
+	@Nullable
+	public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type)
+	{
+		return Overwatch.MODID + ":textures/models/armor/" + hero.name.toLowerCase() + "_" + hero.textureVariation + "_layer_" + (slot == EntityEquipmentSlot.LEGS ? 2 : 1) + ".png";
+	}
+
+	@Mod.EventBusSubscriber
+	public static class SetManager
+	{
+		// List of players wearing full sets and the sets that they are wearing
+		public static HashMap<UUID, EnumHero> playersWearingSets = Maps.newHashMap();
+		// List of players' last known full sets worn (for knowing when to reset
+		// cooldowns)
+		public static HashMap<UUID, EnumHero> lastWornSets = Maps.newHashMap();
+
+		// Clear cooldowns of players logging in (for when switching worlds)
+		@SubscribeEvent
+		public static void resetCooldowns(PlayerLoggedInEvent event)
+		{
+			for (KeyBind key : Keys.KeyBind.values())
+			{
+				if (key.getCooldown(event.player) > 0)
+				{
+					key.setCooldown(event.player, 0);
+				}
+			}
+			for (EnumHero hero : EnumHero.values())
+			{
+				for (Ability ability : new Ability[] { hero.ability1, hero.ability2, hero.ability3 })
+				{
+					if (ability.multiAbilityUses.remove(event.player.getPersistentID()) != null && event.player instanceof EntityPlayerMP)
+					{
+						Overwatch.network.sendTo(new SPacketSyncAbilityUses(event.player.getPersistentID(), hero, ability.getNumber(), ability.maxUses, false), (EntityPlayerMP) event.player);
+					}
+				}
+			}
+		}
+
+		/** Clear cooldowns of players respawning */
+		@SubscribeEvent
+		public static void resetCooldowns(PlayerRespawnEvent event)
+		{
+			for (KeyBind key : Keys.KeyBind.values())
+			{
+				if (key.getCooldown(event.player) > 0)
+				{
+					key.setCooldown(event.player, 0);
+				}
+			}
+		}
+
+		@SubscribeEvent
+		public static void updateSets(TickEvent.PlayerTickEvent event)
+		{
+			if (event.phase == TickEvent.Phase.START)
+			{
+				// detect if player is wearing a set
+				ItemStack helm = event.player.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+				EnumHero hero = null;
+				boolean fullSet = helm != null && helm.getItem() instanceof ItemModArmor;
+				if (fullSet)
+				{
+					hero = ((ItemModArmor) helm.getItem()).hero;
+					for (EntityEquipmentSlot slot : SLOTS)
+					{
+						ItemStack armor = event.player.getItemStackFromSlot(slot);
+						if (armor == null || !(armor.getItem() instanceof ItemModArmor) || ((ItemModArmor) (armor.getItem())).hero != hero)
+						{
+							fullSet = false;
+						}
+					}
+				}
+
+				// clear toggles when switching to set or if not holding weapon
+				if (hero != null && (event.player.getHeldItemMainhand() == null || event.player.getHeldItemMainhand().getItem() != hero.weapon) || (fullSet && (!SetManager.playersWearingSets.containsKey(event.player.getPersistentID()) || SetManager.playersWearingSets.get(event.player.getPersistentID()) != hero)))
+				{
+					for (Ability ability : new Ability[] { hero.ability1, hero.ability2, hero.ability3 })
+					{
+						ability.toggled.remove(event.player.getPersistentID());
+					}
+				}
+
+				// update playersWearingSets
+				if (fullSet)
+				{
+					SetManager.playersWearingSets.put(event.player.getPersistentID(), hero);
+					if (SetManager.lastWornSets.get(event.player.getPersistentID()) != hero)
+					{
+						for (KeyBind key : Keys.KeyBind.values())
+						{
+							if (key.getCooldown(event.player) > 0)
+							{
+								key.setCooldown(event.player, 0);
+							}
+						}
+						SetManager.lastWornSets.put(event.player.getPersistentID(), hero);
+					}
+				}
+				else
+				{
+					SetManager.playersWearingSets.remove(event.player.getPersistentID());
+				}
+			}
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced)
+	{
+		if (stack.hasTagCompound() && stack.getTagCompound().hasKey("devSpawned"))
+		{
+			tooltip.add(TextFormatting.DARK_PURPLE + "" + TextFormatting.BOLD + "Dev Spawned");
+		}
+		super.addInformation(stack, player, tooltip, advanced);
+	}
+
+	@Override
+	public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
+	{
+		// delete dev spawned items if not in dev's inventory and delete
+		// disabled items (except missingTexture items in SMP)
+		if (!world.isRemote && entity instanceof EntityPlayer && stack.hasTagCompound() && stack.getTagCompound().hasKey("devSpawned") && !CommandDev.DEVS.contains(entity.getPersistentID()) && ((EntityPlayer) entity).inventory.getStackInSlot(slot) == stack)
+		{
+			((EntityPlayer) entity).inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+			return;
+		}
+
+		// set damage to full if option set to never use durability
+		if (Config.durabilityOptionArmors == 2 && stack.getItemDamage() != 0)
+			stack.setItemDamage(0);
+
+		super.onUpdate(stack, world, entity, slot, isSelected);
+	}
+
+	/** Delete dev spawned dropped items */
+	@Override
+	public boolean onEntityItemUpdate(EntityItem entityItem)
+	{
+		// delete dev spawned items if not worn by dev and delete disabled items
+		// (except missingTexture items in SMP)
+		if (!entityItem.world.isRemote && entityItem != null && entityItem.getEntityItem() != null && entityItem.getEntityItem().hasTagCompound() && entityItem.getEntityItem().getTagCompound().hasKey("devSpawned"))
+		{
+			entityItem.setDead();
+			return true;
+		}
+		return false;
+	}
+
+	/** Handles most of the armor set special effects and bonuses. */
+	@Override
+	public void onArmorTick(World world, EntityPlayer player, ItemStack stack)
+	{
+		// delete dev spawned items if not worn by dev and delete disabled items
+		// (except missingTexture items in SMP)
+		if (stack.isEmpty() || (!world.isRemote && stack.hasTagCompound() && stack.getTagCompound().hasKey("devSpawned") && !CommandDev.DEVS.contains(player.getPersistentID()) && player.getItemStackFromSlot(this.armorType) == stack))
+		{
+			player.setItemStackToSlot(this.armorType, ItemStack.EMPTY);
+			return;
+		}
+
+		// tracer chestplate particles
+		if (this.armorType == EntityEquipmentSlot.CHEST && hero == EnumHero.TRACER && world.isRemote && player != null && (player.chasingPosX != 0 || player.chasingPosY != 0 || player.chasingPosZ != 0))
+		{
+			int numParticles = (int) ((Math.abs(player.chasingPosX - player.posX) + Math.abs(player.chasingPosY - player.posY) + Math.abs(player.chasingPosZ - player.posZ)) * 5d);
+			for (int i = 0; i < numParticles; ++i)
+				Overwatch.proxy.spawnParticlesTrail(player.world, player.posX + (player.chasingPosX - player.posX) * i / numParticles, player.posY + (player.chasingPosY - player.posY) * i / numParticles + player.height / 2 + 0.3f, player.posZ + (player.chasingPosZ - player.posZ) * i / numParticles, 0, 0, 0, 0x5EDCE5, 0x007acc, 1, 7, 1);
+		}
+
+		// set damage to full if wearing full set and option set to not use
+		// durability while wearing full set
+		if (!world.isRemote && Config.durabilityOptionArmors == 1 && stack.getItemDamage() != 0 && SetManager.playersWearingSets.get(player.getPersistentID()) == hero)
+			stack.setItemDamage(0);
+	}
+
+}

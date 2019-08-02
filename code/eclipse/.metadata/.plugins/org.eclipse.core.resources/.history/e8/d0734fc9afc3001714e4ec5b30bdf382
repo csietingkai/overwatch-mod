@@ -1,0 +1,16 @@
+package com.tingkai.overwatch.render;
+
+import com.tingkai.overwatch.entities.EntityModThrowable;
+
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
+
+public class RenderFactory implements IRenderFactory<EntityModThrowable>
+{
+	@Override
+	public Render<? super EntityModThrowable> createRenderFor(RenderManager manager)
+	{
+		return  new EntityModThrowable(manager);;
+	}
+}

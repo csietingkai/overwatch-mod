@@ -1,0 +1,14 @@
+package com.tingkai.overwatch.entities;
+
+import net.minecraft.world.World;
+
+public class EntityGenjiShuriken extends EntityModThrowable
+{
+
+	public EntityGenjiShuriken(World worldIn)
+	{
+		super(worldIn);
+		this.setSize(0.1f, 0.1f);
+	}
+
+}

@@ -1,0 +1,366 @@
+package com.tingkai.overwatch.proxy;
+
+import java.util.ArrayList;
+import java.util.UUID;
+
+import org.lwjgl.input.Keyboard;
+
+import com.tingkai.overwatch.Overwatch;
+import com.tingkai.overwatch.entities.EntityAnaBullet;
+import com.tingkai.overwatch.entities.EntityBastionBullet;
+import com.tingkai.overwatch.entities.EntityGenjiShuriken;
+import com.tingkai.overwatch.entities.EntityHanzoArrow;
+import com.tingkai.overwatch.entities.EntityHanzoScatterArrow;
+import com.tingkai.overwatch.entities.EntityHanzoSonicArrow;
+import com.tingkai.overwatch.entities.EntityMcCreeBullet;
+import com.tingkai.overwatch.entities.EntityMeiBlast;
+import com.tingkai.overwatch.entities.EntityMeiIcicle;
+import com.tingkai.overwatch.entities.EntityReaperBullet;
+import com.tingkai.overwatch.entities.EntitySoldier76Bullet;
+import com.tingkai.overwatch.entities.EntitySoldier76HelixRocket;
+import com.tingkai.overwatch.entities.EntityTracerBullet;
+import com.tingkai.overwatch.entities.EntityWidowmakerBullet;
+import com.tingkai.overwatch.hero.EnumHero;
+import com.tingkai.overwatch.items.ModItems;
+import com.tingkai.overwatch.items.weapons.ItemReaperShotgun;
+import com.tingkai.overwatch.key.Keys;
+import com.tingkai.overwatch.particles.ParticleAnaHealth;
+import com.tingkai.overwatch.particles.ParticleHanzoSonic;
+import com.tingkai.overwatch.particles.ParticleMeiBlaster;
+import com.tingkai.overwatch.particles.ParticleReaperTeleport;
+import com.tingkai.overwatch.particles.ParticleSmoke;
+import com.tingkai.overwatch.particles.ParticleSpark;
+import com.tingkai.overwatch.particles.ParticleTrail;
+import com.tingkai.overwatch.render.RenderAnaBullet;
+import com.tingkai.overwatch.render.RenderBastionBullet;
+import com.tingkai.overwatch.render.RenderGenjiShuriken;
+import com.tingkai.overwatch.render.RenderHanzoArrow;
+import com.tingkai.overwatch.render.RenderHanzoScatterArrow;
+import com.tingkai.overwatch.render.RenderHanzoSonicArrow;
+import com.tingkai.overwatch.render.RenderInvisible;
+import com.tingkai.overwatch.render.RenderMcCreeBullet;
+import com.tingkai.overwatch.render.RenderMeiIcicle;
+import com.tingkai.overwatch.render.RenderReaperBullet;
+import com.tingkai.overwatch.render.RenderSoldier76Bullet;
+import com.tingkai.overwatch.render.RenderSoldier76HelixRocket;
+import com.tingkai.overwatch.render.RenderTracerBullet;
+import com.tingkai.overwatch.render.RenderWidowmakerBullet;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelBakery;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.obj.OBJLoader;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+public class ClientProxy extends CommonProxy
+{
+	public static ArrayList<UUID> healthParticleEntities = new ArrayList<UUID>();
+
+	@Override
+	public void preInit(FMLPreInitializationEvent event)
+	{
+		super.preInit(event);
+		OBJLoader.INSTANCE.addDomain(Overwatch.MODID);
+		registerObjRenders();
+		registerEntityRenders();
+		Keys.HERO_INFORMATION = new KeyBinding("Hero Information", Keyboard.KEY_GRAVE, Overwatch.MODNAME);
+		Keys.RELOAD = new KeyBinding("Reload", Keyboard.KEY_R, Overwatch.MODNAME);
+		Keys.ABILITY_1 = new KeyBinding("Ability 1", Keyboard.KEY_LMENU, Overwatch.MODNAME);
+		Keys.ABILITY_2 = new KeyBinding("Ability 2", Keyboard.KEY_C, Overwatch.MODNAME);
+		Keys.ULTIMATE = new KeyBinding("Ultimate", Keyboard.KEY_Z, Overwatch.MODNAME);
+	}
+
+	@Override
+	public void init(FMLInitializationEvent event)
+	{
+		super.init(event);
+		registerRenders();
+		ClientRegistry.registerKeyBinding(Keys.HERO_INFORMATION);
+		ClientRegistry.registerKeyBinding(Keys.RELOAD);
+		ClientRegistry.registerKeyBinding(Keys.ABILITY_1);
+		ClientRegistry.registerKeyBinding(Keys.ABILITY_2);
+		ClientRegistry.registerKeyBinding(Keys.ULTIMATE);
+	}
+
+	@Override
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		super.postInit(event);
+	}
+
+	private static void registerRenders()
+	{
+		for (Item item : ModItems.jsonModelItems)
+		{
+			Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5), "inventory"));
+		}
+	}
+
+	private static void registerObjRenders()
+	{
+		for (final Item item : ModItems.objModelItems)
+		{
+			if (item == EnumHero.HANZO.weapon)
+			{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+				{
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack)
+					{
+						int model = 0;
+						if (stack.hasTagCompound())
+						{
+							EntityPlayer player = Minecraft.getMinecraft().world.getPlayerEntityByUUID(stack.getTagCompound().getUniqueId("player"));
+							if (player != null)
+							{
+								model = (int) ((float) (stack.getMaxItemUseDuration() - player.getItemInUseCount()) / 4.0F) + 1;
+								if (player.getActiveItemStack() == null || !player.getActiveItemStack().equals(stack))
+								{
+									model = 0;
+								}
+								else if (model > 4)
+								{
+									model = 4;
+								}
+							}
+						}
+						return new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + model + "_3d", "inventory");
+					}
+				});
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "0_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "1_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "2_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "3_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "4_3d", "inventory"));
+			}
+			/*else if (item == EnumHero.SOLDIER76.weapon)
+			{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+				{
+
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack)
+					{
+						boolean blocking = false;
+						if (stack.hasTagCompound())
+						{
+							EntityPlayer player = Minecraft.getMinecraft().world.getPlayerEntityByUUID(stack.getTagCompound().getUniqueId("player"));
+							blocking = player != null ? player.isSprinting() : false;
+						}
+						return new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + (blocking ? "_blocking_3d" : "_3d"), "inventory");
+					}
+				});
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_blocking_3d", "inventory"));
+			}
+			else if (item == EnumHero.BASTION.weapon)
+			{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+				{
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack)
+					{
+						boolean turret = false;
+						return new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + (turret ? "_1_3d" : "_0_3d"), "inventory");
+					}
+				});
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_0_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_1_3d", "inventory"));
+			}*/
+			else if (item == EnumHero.WIDOWMAKER.weapon)
+
+			{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+				{
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack)
+					{
+						boolean scoping = false;
+						if (stack.hasTagCompound())
+						{
+							EntityPlayer player = Minecraft.getMinecraft().world.getPlayerEntityByUUID(stack.getTagCompound().getUniqueId("player"));
+							scoping = (player != null && player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() == EnumHero.WIDOWMAKER.weapon && (player.getActiveItemStack() == stack || Overwatch.keys.rmb(player)) && EnumHero.WIDOWMAKER.weapon.getCurrentAmmo(player) > 0);
+						}
+						return new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + (scoping ? "_scoping_3d" : "_3d"), "inventory");
+					}
+				});
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_scoping_3d", "inventory"));
+			}
+			else if (item == EnumHero.ANA.weapon)
+			{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
+				{
+					@Override
+					public ModelResourceLocation getModelLocation(ItemStack stack)
+					{
+						boolean scoping = false;
+						if (stack.hasTagCompound())
+						{
+							EntityPlayer player = Minecraft.getMinecraft().world.getPlayerEntityByUUID(stack.getTagCompound().getUniqueId("player"));
+							scoping = (player != null && player.getHeldItemMainhand() != null && player.getHeldItemMainhand().getItem() == EnumHero.ANA.weapon && (player.getActiveItemStack() == stack || Overwatch.keys.rmb(player)) && EnumHero.ANA.weapon.getCurrentAmmo(player) > 0);
+						}
+						return new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + (scoping ? "_scoping_3d" : "_3d"), "inventory");
+					}
+				});
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_3d", "inventory"));
+				ModelBakery.registerItemVariants(item, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_scoping_3d", "inventory"));
+			}
+			else
+			{
+				ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(Overwatch.MODID + ":" + item.getUnlocalizedName().substring(5) + "_3d", "inventory"));
+			}
+		}
+	}
+
+	private void registerEntityRenders()
+	{
+		RenderingRegistry.registerEntityRenderingHandler(EntityReaperBullet.class, RenderReaperBullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityHanzoArrow.class, RenderHanzoArrow::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityHanzoSonicArrow.class, RenderHanzoSonicArrow::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityHanzoScatterArrow.class, RenderHanzoScatterArrow::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityAnaBullet.class, RenderAnaBullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityGenjiShuriken.class, RenderGenjiShuriken::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityTracerBullet.class, RenderTracerBullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMcCreeBullet.class, RenderMcCreeBullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntitySoldier76Bullet.class, RenderSoldier76Bullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntitySoldier76HelixRocket.class, RenderSoldier76HelixRocket::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityBastionBullet.class, RenderBastionBullet::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMeiBlast.class, RenderInvisible::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityMeiIcicle.class, RenderMeiIcicle::new);
+		RenderingRegistry.registerEntityRenderingHandler(EntityWidowmakerBullet.class, RenderWidowmakerBullet::new);
+	}
+
+	@Override
+	protected void registerEventListeners()
+	{
+		super.registerEventListeners();
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	@SubscribeEvent
+	public void stitcherEventPre(TextureStitchEvent.Pre event)
+	{
+		event.getMap().registerSprite(ParticleAnaHealth.TEXTURE);
+		event.getMap().registerSprite(ParticleHanzoSonic.TEXTURE);
+		event.getMap().registerSprite(ParticleTrail.TEXTURE);
+		for (ResourceLocation loc : ParticleSmoke.TEXTURES)
+		{
+			event.getMap().registerSprite(loc);
+		}
+		for (ResourceLocation loc : ParticleSpark.TEXTURES)
+		{
+			event.getMap().registerSprite(loc);
+		}
+		event.getMap().registerSprite(ParticleMeiBlaster.TEXTURE);
+		for (ResourceLocation loc : ParticleReaperTeleport.TEXTURES)
+		{
+			event.getMap().registerSprite(loc);
+		}
+	}
+
+	@Override
+	public void mouseClick()
+	{
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.objectMouseOver != null && !mc.player.isRowingBoat())
+		{
+			switch (mc.objectMouseOver.typeOfHit)
+			{
+				case ENTITY:
+					mc.playerController.attackEntity(mc.player, mc.objectMouseOver.entityHit);
+					break;
+				case BLOCK:
+				case MISS:
+					mc.player.resetCooldown();
+					net.minecraftforge.common.ForgeHooks.onEmptyLeftClick(mc.player);
+			}
+			mc.player.swingArm(EnumHand.MAIN_HAND);
+		}
+	}
+
+	@Override
+	public void spawnParticlesAnaHealth(EntityLivingBase entity)
+	{
+		if (!healthParticleEntities.contains(entity.getPersistentID()))
+		{
+			ParticleAnaHealth particle = new ParticleAnaHealth(entity);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+			healthParticleEntities.add(entity.getPersistentID());
+		}
+	}
+
+	@Override
+	public void spawnParticlesHanzoSonic(World world, double x, double y, double z, boolean isBig, boolean isFast)
+	{
+		ParticleHanzoSonic particle = new ParticleHanzoSonic(world, x, y, z, isBig, isFast);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+	}
+
+	@Override
+	public void spawnParticlesHanzoSonic(World world, Entity trackEntity, boolean isBig)
+	{
+		ParticleHanzoSonic particle = new ParticleHanzoSonic(world, trackEntity, isBig);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+	}
+
+	@Override
+	public void spawnParticlesTrail(World world, double x, double y, double z, double motionX, double motionY, double motionZ, int color, int colorFade, float scale, int maxAge, float alpha)
+	{
+		int i = Minecraft.getMinecraft().gameSettings.particleSetting;
+		if (i == 0 || world.rand.nextInt(i * 2) == 0)
+		{
+			ParticleTrail particle = new ParticleTrail(world, x, y, z, motionX, motionY, motionZ, color, colorFade, scale, maxAge, alpha);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+		}
+	}
+
+	@Override
+	public void spawnParticlesSmoke(World world, double x, double y, double z, int color, int colorFade, float scale, int maxAge)
+	{
+		ParticleSmoke particle = new ParticleSmoke(world, x, y, z, color, colorFade, scale, maxAge);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+	}
+
+	@Override
+	public void spawnParticlesSpark(World world, double x, double y, double z, int color, int colorFade, float scale, int maxAge)
+	{
+		ParticleSpark particle = new ParticleSpark(world, x, y, z, color, colorFade, scale, maxAge);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+	}
+
+	@Override
+	public void spawnParticlesMeiBlaster(World world, double x, double y, double z, double motionX, double motionY, double motionZ, float alpha, int maxAge, float initialScale, float finalScale)
+	{
+		ParticleMeiBlaster particle = new ParticleMeiBlaster(world, x, y, z, motionX, motionY, motionZ, alpha, maxAge, initialScale, finalScale);
+		Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+	}
+
+	@Override
+	public void spawnParticlesReaperTeleport(World world, EntityPlayer player, boolean spawnAtPlayer, int type)
+	{
+		if (spawnAtPlayer || ItemReaperShotgun.clientTps.containsKey(player))
+		{
+			ParticleReaperTeleport particle = new ParticleReaperTeleport(world, player, spawnAtPlayer, type);
+			Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+		}
+	}
+}

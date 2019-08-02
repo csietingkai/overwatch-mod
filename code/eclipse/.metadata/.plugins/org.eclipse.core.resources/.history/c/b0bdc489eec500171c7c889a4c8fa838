@@ -1,0 +1,12 @@
+package com.tingkai.overwatch.items.weapons;
+
+public class ItemMeiBlaster extends ItemOWWeapon
+{
+
+	public ItemMeiBlaster()
+	{
+		super(10);
+		// TODO Auto-generated constructor stub
+	}
+
+}

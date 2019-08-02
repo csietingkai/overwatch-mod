@@ -1,0 +1,6 @@
+package com.tingkai.overwatch.entities;
+
+public class EntityReaperBullet
+{
+
+}

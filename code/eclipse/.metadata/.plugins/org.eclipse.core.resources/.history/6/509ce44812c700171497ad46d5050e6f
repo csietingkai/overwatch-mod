@@ -1,0 +1,479 @@
+package com.tingkai.overwatch.hero;
+
+import java.util.HashMap;
+import java.util.UUID;
+
+import com.google.common.collect.Maps;
+import com.tingkai.overwatch.Config;
+import com.tingkai.overwatch.Overwatch;
+import com.tingkai.overwatch.items.ItemOWToken;
+import com.tingkai.overwatch.items.armors.ItemOWArmor;
+import com.tingkai.overwatch.items.weapons.ItemAnaRifle;
+import com.tingkai.overwatch.items.weapons.ItemBastionGun;
+import com.tingkai.overwatch.items.weapons.ItemGenjiShuriken;
+import com.tingkai.overwatch.items.weapons.ItemHanzoBow;
+import com.tingkai.overwatch.items.weapons.ItemMcCreeGun;
+import com.tingkai.overwatch.items.weapons.ItemMeiBlaster;
+import com.tingkai.overwatch.items.weapons.ItemOWWeapon;
+import com.tingkai.overwatch.items.weapons.ItemReaperShotgun;
+import com.tingkai.overwatch.items.weapons.ItemReinhardtHammer;
+import com.tingkai.overwatch.items.weapons.ItemSoldier76Gun;
+import com.tingkai.overwatch.items.weapons.ItemTracerPistol;
+import com.tingkai.overwatch.items.weapons.ItemWidowmakerRifle;
+import com.tingkai.overwatch.key.Keys.KeyBind;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor.ArmorMaterial;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.fml.client.config.GuiUtils;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+public enum EnumHeros
+{
+	ANA("Ana", true, new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.ABILITY_1, false, false, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 10, 10, new int[] { 2, 3, 3, 2 }, new ItemAnaRifle(), Crosshair.CIRCLE_SMALL), 
+	GENJI("Genji", false, new Ability(KeyBind.ABILITY_2, false, true, 0, 0), new Ability(KeyBind.ABILITY_1, false, false, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 24, 0, new int[] { 2, 3, 3, 2 }, new ItemGenjiShuriken(), Crosshair.CIRCLE_SMALL),
+	HANZO("Hanzo", false, new Ability(KeyBind.ABILITY_2, true, true, 0, 0), new Ability(KeyBind.ABILITY_1, true, true, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 0, 0, new int[] { 2, 3, 3, 2 }, new ItemHanzoBow(), Crosshair.BOW),
+	MCCREE("McCree", false, new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.ABILITY_1, false, false, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 6, 0, new int[] { 2, 3, 3, 2 }, new ItemMcCreeGun(), Crosshair.CIRCLE_SMALL), 
+	//REAPER("Reaper", false, new Ability(KeyBind.ABILITY_2, true, true, 0, 0), new Ability(KeyBind.ABILITY_1, false, true, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 8, 0, new int[] { 2, 3, 3, 2 }, new ItemReaperShotgun(), Crosshair.CIRCLE_BIG),
+	//REINHARDT("Reinhardt", false, new Ability(KeyBind.RMB, false, false, 0, 0), new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.ABILITY_1, false, true, 0, 0), 0, 0, new int[] { 4, 6, 6, 4 }, new ItemReinhardtHammer(), Crosshair.CIRCLE_SMALL),
+	//SOLDIER76("Soldier76", false, new Ability(KeyBind.RMB, true, false, 0, 0), new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 25, 0, new int[] { 2, 3, 3, 2 }, new ItemSoldier76Gun(), Crosshair.PLUS),
+	TRACER("Tracer", false, new Ability(KeyBind.ABILITY_2, false, true, 0, 0), new Ability(KeyBind.ABILITY_1, true, false, 3, 60), new Ability(KeyBind.NONE, false, false, 0, 0), 40, 0, new int[] { 2, 2, 2, 2 }, new ItemTracerPistol(), Crosshair.CIRCLE_SMALL),
+	//BASTION("Bastion", false, new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.ABILITY_1, false, true, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 25, 0, new int[] { 2, 3, 3, 2 }, new ItemBastionGun(), Crosshair.PLUS),
+	//MEI("Mei", false, new Ability(KeyBind.ABILITY_2, false, true, 0, 0), new Ability(KeyBind.ABILITY_1, false, true, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 200, 0, new int[] { 2, 3, 3, 2 }, new ItemMeiBlaster(), Crosshair.CIRCLE_SMALL),
+	WIDOWMAKER("Widowmaker", false, new Ability(KeyBind.ABILITY_2, false, false, 0, 0), new Ability(KeyBind.ABILITY_1, false, false, 0, 0), new Ability(KeyBind.NONE, false, false, 0, 0), 30, 0, new int[] { 2, 3, 3, 2 }, new ItemWidowmakerRifle(), Crosshair.CIRCLE_SMALL);
+
+	public String name;
+
+	public int overlayIndex;
+	public boolean hasAltWeapon;
+	public int altWeaponIndex;
+	public int mainAmmo;
+	public int altAmmo;
+
+	public int[] armorReductionAmounts;
+	public ArmorMaterial material;
+	public ItemOWArmor helmet;
+	public ItemOWArmor chestplate;
+	public ItemOWArmor leggings;
+	public ItemOWArmor boots;
+	public ItemOWWeapon weapon;
+	public ItemOWToken token;
+
+	public Ability ability1;
+	public Ability ability2;
+	public Ability ability3;
+
+	public HashMap<UUID, Boolean> playerUsingAlt = Maps.newHashMap();
+
+	public int textureVariation;
+	private Crosshair crosshair;
+
+	private static enum Crosshair
+	{
+		CIRCLE_SMALL(new ResourceLocation(Overwatch.MODID, "textures/gui/crosshair_circle_small.png")), CIRCLE_BIG(new ResourceLocation(Overwatch.MODID, "textures/gui/crosshair_circle_big.png")), PLUS(new ResourceLocation(Overwatch.MODID, "textures/gui/crosshair_plus.png")), BOW(new ResourceLocation(Overwatch.MODID, "textures/gui/crosshair_bow.png"));
+
+		public ResourceLocation location;
+
+		private Crosshair(ResourceLocation location)
+		{
+			this.location = location;
+		}
+	}
+
+	private static final class IndexCounter
+	{
+		public static int index;
+	}
+
+	static
+	{
+		for (EnumHeros hero : EnumHeros.values())
+		{
+			hero.weapon.hero = hero;
+		}
+	}
+
+	private EnumHeros(String name, boolean hasAltWeapon, Ability ability1, Ability ability2, Ability ability3, int mainAmmo, int altAmmo, int[] armorReductionAmounts, ItemOWWeapon weapon, Crosshair crosshair)
+	{
+		this.overlayIndex = IndexCounter.index++;
+		this.name = name;
+		this.hasAltWeapon = hasAltWeapon;
+		if (this.hasAltWeapon)
+		{
+			this.altWeaponIndex = IndexCounter.index++;
+		}
+		this.ability1 = ability1;
+		this.ability2 = ability2;
+		this.ability3 = ability3;
+		this.ability1.hero = this;
+		this.ability2.hero = this;
+		this.ability3.hero = this;
+		this.mainAmmo = mainAmmo;
+		this.altAmmo = altAmmo;
+		this.armorReductionAmounts = armorReductionAmounts;
+		this.weapon = weapon;
+		this.crosshair = crosshair;
+	}
+
+	public Item getEquipment(EntityEquipmentSlot slot)
+	{
+		switch (slot)
+		{
+			case HEAD:
+				return helmet;
+			case CHEST:
+				return chestplate;
+			case LEGS:
+				return leggings;
+			case FEET:
+				return boots;
+			case MAINHAND:
+				return weapon;
+			default:
+				break;
+		}
+		return null;
+	}
+
+	@Mod.EventBusSubscriber(Side.CLIENT)
+	public static class RenderManager
+	{
+		@SubscribeEvent
+		@SideOnly(Side.CLIENT)
+		public static void renderCrosshairs(RenderGameOverlayEvent.Pre event)
+		{
+			if (event.getType() == ElementType.CROSSHAIRS && Config.guiScale > 0)
+			{
+				EntityPlayer player = Minecraft.getMinecraft().player;
+				EnumHeros hero = ItemOWArmor.SetManager.playersWearingSets.containsKey(player.getPersistentID()) ? ItemOWArmor.SetManager.playersWearingSets.get(player.getPersistentID()) : null;
+				EnumHand hand = null;
+				for (EnumHand hand2 : EnumHand.values())
+				{
+					if (player.getHeldItem(hand2) != null && player.getHeldItem(hand2).getItem() instanceof ItemOWWeapon && (((ItemOWWeapon) player.getHeldItem(hand2).getItem()).hero == hero || hand == null || ((ItemOWWeapon) player.getHeldItem(hand).getItem()).hero != hero))
+					{
+						hand = hand2;
+					}
+				}
+				ItemOWWeapon weapon = hand == null ? null : (ItemOWWeapon) player.getHeldItem(hand).getItem();
+
+				if (weapon != null)
+				{
+					if (!(weapon.hero == hero && Overwatch.keys.heroInformation(player)) && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0)
+					{
+						GlStateManager.pushMatrix();
+						GlStateManager.enableBlend();
+
+						// render crosshair
+						double scale = 0.2d * Config.guiScale;
+						GlStateManager.scale(scale, scale, 1);
+						GlStateManager.translate((int) ((event.getResolution().getScaledWidth_double() - 256 * scale) / 2d / scale), (int) ((event.getResolution().getScaledHeight_double() - 256 * scale) / 2d / scale), 0);
+						if (Config.customCrosshairs)
+						{
+							Minecraft.getMinecraft().getTextureManager().bindTexture(weapon.hero.crosshair.location);
+							GuiUtils.drawTexturedModalRect(3, 3, 0, 0, 256, 256, 0);
+						}
+
+						GlStateManager.disableBlend();
+						GlStateManager.popMatrix();
+
+						// tracer's dash
+						/*if (weapon.hero == EnumHeros.TRACER && ItemOWArmor.SetManager.playersWearingSets.get(player.getPersistentID()) == EnumHeros.TRACER)
+						{
+							GlStateManager.pushMatrix();
+							GlStateManager.enableBlend();
+
+							scale = 0.8d * Config.guiScale;
+							GlStateManager.scale(scale, scale * 4, 1);
+							GlStateManager.translate((int) ((event.getResolution().getScaledWidth_double() - 83 * scale) / 2d / scale), (int) ((event.getResolution().getScaledHeight_double() - 80 * scale) / 8d / scale), 0);
+							Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/ability_overlay.png"));
+							int uses = weapon.hero.ability2.getUses(player);
+							GuiUtils.drawTexturedModalRect(23, 21, 1, uses > 2 ? 1011 : 1015, 40, 4, 0);
+							GlStateManager.scale(0.75f, 0.75f, 1);
+							GuiUtils.drawTexturedModalRect(37, 25, 1, uses > 1 ? 1011 : 1015, 40, 4, 0);
+							GlStateManager.scale(0.75f, 0.75f, 1);
+							GuiUtils.drawTexturedModalRect(56, 30, 1, uses > 0 ? 1011 : 1015, 40, 4, 0);
+
+							GlStateManager.disableBlend();
+							GlStateManager.popMatrix();
+						}*/
+						// reaper's teleport/cancel overlay
+						/*else if (weapon.hero == EnumHeros.REAPER && ItemReaperShotgun.clientTps.containsKey(player) && ItemReaperShotgun.clientTps.get(player).getFirst() == -1)
+						{
+							GlStateManager.pushMatrix();
+							GlStateManager.enableBlend();
+
+							scale = 0.8d * Config.guiScale;
+							GlStateManager.scale(scale, scale, 1);
+							GlStateManager.translate((int) ((event.getResolution().getScaledWidth_double() - 256 * scale) / 2d / scale), (int) ((event.getResolution().getScaledHeight_double() - 256 * scale) / 2d / scale), 0);
+							Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/reaper_teleport.png"));
+							GuiUtils.drawTexturedModalRect(0, 0, 0, 0, 256, 256, 0);
+
+							GlStateManager.disableBlend();
+							GlStateManager.popMatrix();
+						}*/
+					}
+					if (Config.customCrosshairs)
+						event.setCanceled(true);
+				}
+			}
+		}
+
+		@SubscribeEvent
+		@SideOnly(Side.CLIENT)
+		public static void renderOverlay(RenderGameOverlayEvent.Post event)
+		{
+			if (event.getType() == ElementType.HELMET && Config.guiScale > 0)
+			{
+				EntityPlayer player = Minecraft.getMinecraft().player;
+				EnumHeros hero = ItemOWArmor.SetManager.playersWearingSets.containsKey(player.getPersistentID()) ? ItemOWArmor.SetManager.playersWearingSets.get(player.getPersistentID()) : null;
+				EnumHand hand = null;
+				for (EnumHand hand2 : EnumHand.values())
+					if (player.getHeldItem(hand2) != null && player.getHeldItem(hand2).getItem() instanceof ItemOWWeapon && (((ItemOWWeapon) player.getHeldItem(hand2).getItem()).hero == hero || hand == null || ((ItemOWWeapon) player.getHeldItem(hand).getItem()).hero != hero))
+						hand = hand2;
+				ItemOWWeapon weapon = hand == null ? null : (ItemOWWeapon) player.getHeldItem(hand).getItem();
+
+				// hero information screen
+				if (hero != null && weapon != null && weapon.hero == hero && Overwatch.keys.heroInformation(player))
+				{
+					GlStateManager.pushMatrix();
+					GlStateManager.disableDepth();
+
+					GlStateManager.scale(event.getResolution().getScaledWidth_double() / 256d, event.getResolution().getScaledHeight_double() / 256d, 1);
+					Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/info_background.png"));
+					GuiUtils.drawTexturedModalRect(0, 0, 0, 0, 1920, 1080, 0);
+					Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/" + hero.name + "_info.png"));
+					GuiUtils.drawTexturedModalRect(0, 0, 0, 0, 1920, 1080, 0);
+
+					GlStateManager.enableDepth();
+					GlStateManager.popMatrix();
+				}
+				else
+				{
+					if (hero != null)
+					{
+						// display icon
+						GlStateManager.pushMatrix();
+						GlStateManager.enableDepth();
+						GlStateManager.enableAlpha();
+
+						double scale = 0.35d * Config.guiScale;
+						GlStateManager.scale(scale, scale, 1);
+						GlStateManager.translate(40 - scale * 120, (int) ((event.getResolution().getScaledHeight() - 256 * scale) / scale) - 35 + scale * 110, 0);
+						Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/icon_background.png"));
+						GuiUtils.drawTexturedModalRect(0, 0, 0, 0, 240, 230, 0);
+						Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/" + hero.name + "_icon.png"));
+						GuiUtils.drawTexturedModalRect(0, 0, 0, 0, 240, 230, 0);
+
+						GlStateManager.popMatrix();
+					}
+
+					// display abilities/weapon
+					if (weapon != null)
+					{
+						GlStateManager.pushMatrix();
+						GlStateManager.enableDepth();
+						GlStateManager.enableAlpha();
+
+						double scale = 1d * Config.guiScale;
+						GlStateManager.scale(1 * scale, 4 * scale, 1);
+						GlStateManager.translate((int) (event.getResolution().getScaledWidth() / scale) - 125, ((int) event.getResolution().getScaledHeight() / scale / 4) - 18 + scale * 3, 0);
+						Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation(Overwatch.MODID, "textures/gui/ability_overlay.png"));
+						int index = weapon.hero.playerUsingAlt.containsKey(player.getPersistentID()) && weapon.hero.hasAltWeapon ? weapon.hero.altWeaponIndex : weapon.hero.overlayIndex;
+						int vertical = 11;
+						// weapon
+						GuiUtils.drawTexturedModalRect(0, 0, 1, (index + 1) + index * vertical, 122, vertical, 0);
+
+						if (hero != null && weapon.hero == hero && ItemOWArmor.SetManager.playersWearingSets.containsKey(player.getPersistentID()))
+						{
+							// slot 1
+							if (hero.ability1.keybind.getCooldown(player) > 0 || (hero.ability1.maxUse > 0 && hero.ability1.getUses(player) == 0))
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							else if (hero.ability1.isSelected(player))
+							{
+								GlStateManager.color(0.8f, 0.6f, 0);
+								GlStateManager.translate(1, 1, 0);
+							}
+							GuiUtils.drawTexturedModalRect(-50, -2, 124, (index + 1) + index * vertical, 40, vertical, 0);
+							if (!hero.ability1.isEnabled && hero.ability1.keybind != KeyBind.NONE)
+							{
+								GuiUtils.drawTexturedModalRect(-28, 0, 65, 1015, 12, 9, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							if (hero.ability1.isSelected(player))
+							{
+								GlStateManager.translate(-1, -1, 0);
+							} // slot 2
+							if (hero.ability2.keybind.getCooldown(player) > 0 || (hero.ability2.maxUse > 0 && hero.ability2.getUses(player) == 0))
+							{
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							}
+							else if (hero.ability2.isSelected(player))
+							{
+								GlStateManager.color(0.8f, 0.6f, 0);
+								GlStateManager.translate(1, 1, 0);
+							}
+							GuiUtils.drawTexturedModalRect(-87, -2, 165, (index + 1) + index * vertical, 40, vertical, 0);
+							if (!hero.ability2.isEnabled && hero.ability2.keybind != KeyBind.NONE)
+							{
+								GlStateManager.translate(0, 0.3f, 0);
+								GuiUtils.drawTexturedModalRect(-65, -1, 65, 1015, 12, 9, 0);
+								GlStateManager.translate(0, -0.3f, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							if (hero.ability2.isSelected(player))
+							{
+								GlStateManager.translate(-1, -1, 0);
+							} // slot 3
+							if (hero.ability3.keybind.getCooldown(player) > 0 || (hero.ability3.maxUse > 0 && hero.ability3.getUses(player) == 0))
+							{
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							}
+							else if (hero.ability3.isSelected(player))
+							{
+								GlStateManager.color(0.8f, 0.6f, 0);
+								GlStateManager.translate(1, 1, 0);
+							}
+							GuiUtils.drawTexturedModalRect(-124, -2, 206, (index + 1) + index * vertical, 40, vertical, 0);
+							if (!hero.ability3.isEnabled && hero.ability3.keybind != KeyBind.NONE)
+							{
+								GlStateManager.translate(0, 0.5f, 0);
+								GuiUtils.drawTexturedModalRect(-102, -2, 65, 1015, 12, 9, 0);
+								GlStateManager.translate(0, -0.5f, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							if (hero.ability3.isSelected(player))
+							{
+								GlStateManager.translate(-1, -1, 0);
+							}
+							// keybinds
+							int width1 = Minecraft.getMinecraft().fontRendererObj.getStringWidth(hero.ability1.keybind.getKeyName());
+							int width2 = Minecraft.getMinecraft().fontRendererObj.getStringWidth(hero.ability2.keybind.getKeyName());
+							int width3 = Minecraft.getMinecraft().fontRendererObj.getStringWidth(hero.ability3.keybind.getKeyName());
+							// background
+							// slot 1
+							if (hero.ability1.keybind.getCooldown(player) > 0 || (hero.ability1.maxUse > 0 && hero.ability1.getUses(player) == 0))
+							{
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							}
+							if (hero.ability1.keybind.getKeyName() != "")
+							{
+								GuiUtils.drawTexturedModalRect(-58, 7, 0, 1019, 40, 5, 0);
+							}
+							else if (hero.ability1.keybind == KeyBind.RMB)
+							{
+								GuiUtils.drawTexturedModalRect(-43, 3, 46, 1015, 10, 9, 0);
+							}
+							if (hero.ability1.maxUse > 0)
+							{
+								GuiUtils.drawTexturedModalRect(-30, -10, 81, 1015, 20, 9, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							// slot 2
+							if (hero.ability2.keybind.getCooldown(player) > 0 || (hero.ability2.maxUse > 0 && hero.ability2.getUses(player) == 0))
+							{
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							}
+							if (hero.ability2.keybind.getKeyName() != "")
+							{
+								GuiUtils.drawTexturedModalRect(-98, 6, 0, 1019, 40, 5, 0);
+							}
+							if (hero.ability2.maxUse > 0)
+							{
+								GuiUtils.drawTexturedModalRect(-69, -10, 81, 1015, 20, 9, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							// slot 3
+							if (hero.ability3.keybind.getCooldown(player) > 0 || (hero.ability3.maxUse > 0 && hero.ability3.getUses(player) == 0))
+							{
+								GlStateManager.color(0.4f, 0.4f, 0.4f);
+							}
+							if (hero.ability3.keybind.getKeyName() != "")
+							{
+								GuiUtils.drawTexturedModalRect(-137, 5, 0, 1019, 40, 5, 0);
+							}
+							if (hero.ability3.maxUse > 0)
+							{
+								GuiUtils.drawTexturedModalRect(-106, -11, 81, 1015, 20, 9, 0);
+							}
+							GlStateManager.color(1, 1, 1);
+							// text
+							GlStateManager.scale(1, 0.25d, 1);
+							GlStateManager.rotate(4.5f, 0, 0, 1);
+							// slot 1
+							Minecraft.getMinecraft().fontRendererObj.drawString(hero.ability1.keybind.getKeyName(), -33 - width1 / 2, 38, 0);
+							if (hero.ability1.maxUse > 0)
+							{
+								Minecraft.getMinecraft().fontRendererObj.drawString(String.valueOf(hero.ability1.getUses(player)), -99, -15, 0);
+							} // slot 2
+							Minecraft.getMinecraft().fontRendererObj.drawString(hero.ability2.keybind.getKeyName(), -74 - width2 / 2, 37, 0);
+							if (hero.ability2.maxUse > 0)
+							{
+								Minecraft.getMinecraft().fontRendererObj.drawString(String.valueOf(hero.ability2.getUses(player)), -62, -14, 0);
+							} // slot 3
+							Minecraft.getMinecraft().fontRendererObj.drawString(hero.ability3.keybind.getKeyName(), -114 - width3 / 2, 37, 0);
+							if (hero.ability3.maxUse > 0)
+							{
+								Minecraft.getMinecraft().fontRendererObj.drawString(String.valueOf(hero.ability3.getUses(player)), -23, -16, 0);
+							}
+
+							// cooldowns
+							scale = 2d;
+							GlStateManager.scale(scale, scale, 1);
+							if (hero.ability1.keybind.getCooldown(player) > 0)
+							{
+								String num = String.valueOf((int) Math.ceil(hero.ability1.keybind.getCooldown(player) / 20d));
+								int width = Minecraft.getMinecraft().fontRendererObj.getStringWidth(num);
+								Minecraft.getMinecraft().fontRendererObj.drawString(num, -14 - width / 2, 4, 0xFFFFFF);
+							}
+							if (hero.ability2.keybind.getCooldown(player) > 0)
+							{
+								String num = String.valueOf((int) Math.ceil(hero.ability2.keybind.getCooldown(player) / 20d));
+								int width = Minecraft.getMinecraft().fontRendererObj.getStringWidth(num);
+								Minecraft.getMinecraft().fontRendererObj.drawString(num, -33 - width / 2, 4, 0xFFFFFF);
+							}
+							if (hero.ability3.keybind.getCooldown(player) > 0)
+							{
+								String num = String.valueOf((int) Math.ceil(hero.ability3.keybind.getCooldown(player) / 20d));
+								int width = Minecraft.getMinecraft().fontRendererObj.getStringWidth(num);
+								Minecraft.getMinecraft().fontRendererObj.drawString(num, -51 - width / 2, 4, 0xFFFFFF);
+							}
+						}
+						// ammo
+						if (weapon.getMaxAmmo(player) > 0)
+						{
+							if (weapon.hero != hero || hero == null)
+							{ // adjust things that were skipped
+								GlStateManager.scale(1, 0.25d, 1);
+								GlStateManager.rotate(4.5f, 0, 0, 1);
+								scale = 2d;
+								GlStateManager.scale(scale, scale, 1);
+							}
+
+							scale = 0.9d;
+							GlStateManager.scale(scale, scale, 1);
+							int width = Minecraft.getMinecraft().fontRendererObj.getStringWidth(String.valueOf(weapon.getCurrentAmmo(player)));
+							Minecraft.getMinecraft().fontRendererObj.drawString(String.valueOf(weapon.getCurrentAmmo(player)), 30 - width, -11, 0xFFFFFF);
+							scale = 0.6d;
+							GlStateManager.scale(scale, scale, 1);
+							Minecraft.getMinecraft().fontRendererObj.drawString("/", 53, -13, 0x00D5FF);
+							Minecraft.getMinecraft().fontRendererObj.drawString(String.valueOf(weapon.getMaxAmmo(player)), 59, -13, 0xFFFFFF);
+						}
+
+						GlStateManager.popMatrix();
+					}
+				}
+			}
+		}
+	}
+
+}

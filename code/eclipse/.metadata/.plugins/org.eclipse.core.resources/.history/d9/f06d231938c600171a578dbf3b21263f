@@ -1,0 +1,15 @@
+package com.tingkai.overwatch.render;
+
+public class RenderHanzoSonicArrow extends RenderHanzoArrow
+{
+	public RenderHanzoSonicArrow(RenderManager renderManager)
+	{
+		super(renderManager);
+	}
+
+	@Override
+	protected ResourceLocation getEntityTexture(Entity entity)
+	{
+		return new ResourceLocation(Minewatch.MODID, "textures/entity/hanzo_sonic_arrow.png");
+	}
+}
